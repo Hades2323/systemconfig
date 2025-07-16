@@ -11,19 +11,23 @@ CHOICE=$(zenity --list \
   --text="Scegli un'azione da eseguire" \
   --radiolist \
   --column "✓" --column "Azione" \
-  TRUE "Genera report" \
-  FALSE "Applica ottimizzazioni (--fix)" \
-  FALSE "Ripristina configurazioni (--restore)" \
-  --width=400 --height=400)
+  TRUE "Genera report (solo verifica)" \
+  FALSE "Applica ottimizzazioni (Powertop + TLP)" \
+  FALSE "Applica solo Powertop (senza TLP)" \
+  FALSE "Ripristina configurazioni" \
+  --width=420 --height=280)
 
 case "$CHOICE" in
-  "Genera report")
+  "Genera report (solo verifica)")
     pkexec "$SCRIPT"
     ;;
-  "Applica ottimizzazioni (--fix)")
+  "Applica ottimizzazioni (Powertop + TLP)")
     pkexec "$SCRIPT" --fix
     ;;
-  "Ripristina configurazioni (--restore)")
+  "Applica solo Powertop (senza TLP)")
+    pkexec "$SCRIPT" --no-tlp --fix
+    ;;
+  "Ripristina configurazioni")
     pkexec "$SCRIPT" --restore
     ;;
   *)
