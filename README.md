@@ -1,10 +1,10 @@
-# systemconfig
-Script per controllo e possibile fix dei diversi aspetti del sistema operativo
 
 
-# powersave-report-fix.sh
+
+## powersave-report-fix.sh possibilità di utilizzare la gui gui-zenity.sh
 ### ✅ Funzionalità principali 
 --fix	Applica le ottimizzazioni (governor, TLP, Powertop, USB, Wi-Fi) \
+--no-tlp Applica le ottimizzazioni senza TLP \
 --restore	Ripristina le configurazioni originali salvate prima del fix \
 Backup automatico	Salva configurazioni modificate in una cartella dedicata \
 Report multipli	Genera .html, .txt, .json nella home dell’utente
