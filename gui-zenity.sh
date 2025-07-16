@@ -15,7 +15,7 @@ CHOICE=$(zenity --list \
   FALSE "Applica ottimizzazioni (Powertop + TLP)" \
   FALSE "Applica solo Powertop (senza TLP)" \
   FALSE "Ripristina configurazioni" \
-  --width=420 --height=280)
+  --width=460 --height=460)
 
 case "$CHOICE" in
   "Genera report (solo verifica)")
