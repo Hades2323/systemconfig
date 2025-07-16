@@ -1,6 +1,9 @@
 #!/bin/bash
 
-BASE_DIR="$HOME/report_risparmio"
+# Rileva la HOME dell'utente reale che ha lanciato lo script con sudo o pkexec
+USER_HOME=$(eval echo "~$(logname 2>/dev/null || echo $SUDO_USER)")
+
+BASE_DIR="$USER_HOME/report_risparmio"
 BACKUP_DIR="$BASE_DIR/backup_config"
 mkdir -p "$BASE_DIR" "$BACKUP_DIR"
 
@@ -262,6 +265,16 @@ fi
 mv "$TMP_HTML" "$HTML"
 mv "$TMP_TXT" "$TXT"
 mv "$TMP_JSON" "$JSON"
+
+# Cambia proprietario e permessi dei file a utente "reale"
+USER_NAME=$(logname 2>/dev/null || echo "$SUDO_USER")
+USER_HOME=$(eval echo "~$USER_NAME")
+
+chown "$USER_NAME":"$USER_NAME" "$HTML" "$TXT" "$JSON"
+chmod 644 "$HTML" "$TXT" "$JSON"
+
+chown -R "$USER_NAME":"$USER_NAME" "$BACKUP_DIR"
+chmod -R u+rwX,g-rwx,o-rwx "$BACKUP_DIR"
 
 echo "✅ Report generato:"
 echo "📝 HTML: $HTML"
