@@ -259,31 +259,6 @@ if [[ "$FIX_MODE" -eq 1 ]]; then
     iw dev "$iface" set power_save on 2>/dev/null
   done
 
-  echo "✅ Ottimizzazioni applicate. Rigenera ora il report per verificare."
-fi
-
-mv "$TMP_HTML" "$HTML"
-mv "$TMP_TXT" "$TXT"
-mv "$TMP_JSON" "$JSON"
-
-# Cambia proprietario e permessi dei file a utente "reale"
-USER_NAME=$(logname 2>/dev/null || echo "$SUDO_USER")
-USER_HOME=$(eval echo "~$USER_NAME")
-
-chown "$USER_NAME":"$USER_NAME" "$HTML" "$TXT" "$JSON"
-chmod 644 "$HTML" "$TXT" "$JSON"
-
-chown -R "$USER_NAME":"$USER_NAME" "$BACKUP_DIR"
-chmod -R u+rwX,g-rwx,o-rwx "$BACKUP_DIR"
-
-echo "✅ Report generato:"
-echo "📝 HTML: $HTML"
-echo "🧾 TXT: $TXT"
-echo "📊 JSON: $JSON"
-
-# Durante la modalità --fix, se USE_TLP è 1, si installa/attiva TLP
-
-if [[ "$FIX_MODE" == "1" ]]; then
   echo "⚙️ Modalità AUTO-TUNE attiva: applico ottimizzazioni..."
 
   # 🔧 TLP
@@ -331,15 +306,25 @@ EOF
 
   systemctl daemon-reexec
   systemctl enable --now powertop-autotune.service
+
+  echo "✅ Ottimizzazioni applicate. Rigenera ora il report per verificare."
 fi
 
-# Simula i report
-echo "<html><body><h1>Report $DATE</h1></body></html>" > "$HTML"
-echo "Report generato il $DATE" > "$TXT"
-echo "{\"report\": \"$DATE\"}" > "$JSON"
+mv "$TMP_HTML" "$HTML"
+mv "$TMP_TXT" "$TXT"
+mv "$TMP_JSON" "$JSON"
 
-# Imposta i permessi corretti all'utente
+# Cambia proprietario e permessi dei file a utente "reale"
+USER_NAME=$(logname 2>/dev/null || echo "$SUDO_USER")
+USER_HOME=$(eval echo "~$USER_NAME")
+
 chown "$USER_NAME":"$USER_NAME" "$HTML" "$TXT" "$JSON"
-chown -R "$USER_NAME":"$USER_NAME" "$BACKUP_DIR"
+chmod 644 "$HTML" "$TXT" "$JSON"
 
-echo "✅ Report salvato in: $BASE_DIR"
+chown -R "$USER_NAME":"$USER_NAME" "$BACKUP_DIR"
+chmod -R u+rwX,g-rwx,o-rwx "$BACKUP_DIR"
+
+echo "✅ Report generato:"
+echo "📝 HTML: $HTML"
+echo "🧾 TXT: $TXT"
+echo "📊 JSON: $JSON"
