@@ -14,7 +14,7 @@ CHOICE=$(zenity --list \
   TRUE "Genera report" \
   FALSE "Applica ottimizzazioni (--fix)" \
   FALSE "Ripristina configurazioni (--restore)" \
-  --width=400 --height=250)
+  --width=400 --height=400)
 
 case "$CHOICE" in
   "Genera report")
