@@ -282,13 +282,64 @@ echo "🧾 TXT: $TXT"
 echo "📊 JSON: $JSON"
 
 # Durante la modalità --fix, se USE_TLP è 1, si installa/attiva TLP
+
 if [[ "$FIX_MODE" == "1" ]]; then
+  echo "⚙️ Modalità AUTO-TUNE attiva: applico ottimizzazioni..."
+
+  # 🔧 TLP
   if [[ "$USE_TLP" == "1" ]]; then
     if ! dpkg -s tlp &>/dev/null; then
       echo "📦 TLP non trovato. Puoi installarlo con:"
       echo "sudo add-apt-repository ppa:linrunner/tlp && sudo apt update && sudo apt install tlp"
     else
+      echo "✅ TLP installato. Abilito servizio..."
       systemctl enable --now tlp
+
+      echo "📁 Applico configurazione TLP ottimizzata..."
+      cp /etc/tlp.conf "$BACKUP_DIR/tlp.conf.bak"
+      cat <<EOF > /etc/tlp.conf
+CPU_SCALING_GOVERNOR_ON_AC=powersave
+CPU_SCALING_GOVERNOR_ON_BAT=powersave
+PCIE_ASPM_ON_AC=powersave
+PCIE_ASPM_ON_BAT=powersupersave
+USB_AUTOSUSPEND=1
+USB_BLACKLIST_BTUSB=0
+WIFI_PWR_ON_AC=on
+WIFI_PWR_ON_BAT=on
+SOUND_POWER_SAVE_ON_AC=1
+SOUND_POWER_SAVE_ON_BAT=1
+SATA_LINKPWR_ON_AC=min_power
+SATA_LINKPWR_ON_BAT=min_power
+EOF
     fi
   fi
+
+  # ⚡ powertop --auto-tune systemd service
+  echo "🛠️ Creo servizio powertop-autotune..."
+  cat <<EOF > /etc/systemd/system/powertop-autotune.service
+[Unit]
+Description=Powertop auto-tune
+After=multi-user.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/powertop --auto-tune
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+  systemctl daemon-reexec
+  systemctl enable --now powertop-autotune.service
 fi
+
+# Simula i report
+echo "<html><body><h1>Report $DATE</h1></body></html>" > "$HTML"
+echo "Report generato il $DATE" > "$TXT"
+echo "{\"report\": \"$DATE\"}" > "$JSON"
+
+# Imposta i permessi corretti all'utente
+chown "$USER_NAME":"$USER_NAME" "$HTML" "$TXT" "$JSON"
+chown -R "$USER_NAME":"$USER_NAME" "$BACKUP_DIR"
+
+echo "✅ Report salvato in: $BASE_DIR"
